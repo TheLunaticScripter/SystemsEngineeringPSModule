@@ -48,13 +48,13 @@ Function New-StandardVM {
             }
 
             # Get Cluster Resource Pool
-            If($Site[0] -like "*South*"){
+            If($Site[0] -like "*Site1*"){
                 $Resource = Get-ResourcePool
                 if($Resource.Count -gt 1){
-                    $Resource = $Resource | Where {$_.Parent -like "*South*"}
+                    $Resource = $Resource | Where {$_.Parent -like "*Site1*"}
                 }
                 else{
-                    if($Resource.Parent -like "*South*"){
+                    if($Resource.Parent -like "*Site1*"){
                     }
                     else{
                         Write-Host "There is currently an issue with the VSphere service." -ForegroundColor Red
@@ -62,13 +62,13 @@ Function New-StandardVM {
                     }
                 }
             }
-            elseIf($Site[0] -like "*North*"){
+            elseIf($Site[0] -like "*Site2*"){
                 $Resource = Get-ResourcePool
                 if($Resource.Count -gt 1){
-                    $Resource = $Resource | Where {$_.Parent -like "*North*"}
+                    $Resource = $Resource | Where {$_.Parent -like "*Site2*"}
                 }
                 else{
-                    if($Resource.Parent -like "*North*"){
+                    if($Resource.Parent -like "*Site2*"){
                     }
                     else{
                         Write-Host "There is currently an issue with the VSphere service." -ForegroundColor Red
@@ -221,12 +221,12 @@ Function New-StandardVM {
 <#
 .Synopsis
    Creates a new Windows 2012 R2 SP1 Standard Virtual Machine 
-   on the North or South Cluster.
+   on the Site2 or Site1 Cluster.
 
 .Description
    The New-StandardVM Function creates a new Windows 2012 R2 SP1 
    Standard Virtual Machine on the VMware Environment. It can be 
-   on the North Cluster or the South Cluster.
+   on the Site2 Cluster or the Site1 Cluster.
 
 .Parameter Name
    The name of the Server
@@ -239,7 +239,7 @@ Function New-StandardVM {
    already be a valide DataStore in VSphere environment.
 
 .Parameter Site
-   The cluster site the VM will be on example North or South
+   The cluster site the VM will be on example Site2 or Site1
 
 .Parameter ConfigDataBaseDirectory
    The Folder location where the network specific Configuration 
@@ -271,7 +271,7 @@ Function New-StandardVM {
       -Name "Testing" `
       -Folder "Testing" `
       -DataStore "TestDataStore_1" `
-      -Site "South" `
+      -Site "Site1" `
       -ConfigDataBaseDirectory "\\contoso\share\ConfigData" `
       -ConfigDataFileName "ConfigData.psd1"
 
@@ -280,7 +280,7 @@ Function New-StandardVM {
       -Name "Testing" `
       -Folder "Testing" `
       -DataStore "TestDataStore_1" `
-      -Site "South" `
+      -Site "Site1" `
       -ConfigDataBaseDirectory "\\contoso\share\ConfigData" `
       -ConfigDataFileName "ConfigData.psd1" `
       -Template "Windows Server 2008 R2" `
@@ -793,7 +793,7 @@ workflow Build-VirtualServer{
         [Parameter(Mandatory=$true,Position=1)]
         [string]$Service,
         [Parameter(Mandatory=$true,Position=2)]
-        [ValidateSet('South','North')]
+        [ValidateSet('Site1','Site2')]
         [string]$Site,
         [Parameter(Mandatory=$true,Position=3)]
         [string]$ConfigDataBaseDir,
@@ -863,22 +863,22 @@ workflow Build-VirtualServer{
     if($DataStore){
         $SetDataStore = $DataStore
     }
-    elseif($Site -eq "South" ){
-        $SetDataStore = $ConfigData.South.DefaultDataStore
+    elseif($Site -eq "Site1" ){
+        $SetDataStore = $ConfigData.Site1.DefaultDataStore
     }
-    elseif($Site -eq "North"){
-        $SetDataStore = $ConfigData.North.DefaultDataStore
+    elseif($Site -eq "Site2"){
+        $SetDataStore = $ConfigData.Site2.DefaultDataStore
     }
 
     $SetNetwork = ""
     if($VMNetwork){
         $SetNetwork = $VMNetwork
     }
-    elseif($Site -eq "South"){
-        $SetNetwork = $ConfigData.South.DefaultNetwork
+    elseif($Site -eq "Site1"){
+        $SetNetwork = $ConfigData.Site1.DefaultNetwork
     }
-    elseif($Site -eq "North"){
-        $SetNetwork = $ConfigData.North.DefaultNetwork
+    elseif($Site -eq "Site2"){
+        $SetNetwork = $ConfigData.Site2.DefaultNetwork
     }
     $SetNetwork
     
@@ -926,10 +926,10 @@ workflow Build-VirtualServer{
             }
                 
             # Check SQL Folder in VSphere
-            $BaseFoldS = Get-Folder -Name "vm" -Location "South*"
-            $BaseFoldN = Get-Folder -Name "vm" -Location "North*"
-            $SqlFolderS = Get-Folder -Name $Service -Location "South*" -ErrorAction SilentlyContinue
-            $SqlFolderN = Get-Folder -Name $Service -Location "North*" -ErrorAction SilentlyContinue
+            $BaseFoldS = Get-Folder -Name "vm" -Location "Site1*"
+            $BaseFoldN = Get-Folder -Name "vm" -Location "Site2*"
+            $SqlFolderS = Get-Folder -Name $Service -Location "Site1*" -ErrorAction SilentlyContinue
+            $SqlFolderN = Get-Folder -Name $Service -Location "Site2*" -ErrorAction SilentlyContinue
             $VMFolderUp = $false
             if($SqlFolderS){
                 If($SqlFolderN -ne $null){
